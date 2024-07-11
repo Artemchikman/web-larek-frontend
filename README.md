@@ -43,233 +43,117 @@ yarn build
 ## Архитектура проекта
 ![alt text](image.png)
 
-## Паттерн проектирования (MVP) Этот патерн разделяет пользовательский интерфейс на три части: Model, View и Presenter, что обеспечивает лучшее тестирование и поддержку кода.
 
-Распределение классов между слоями паттерна MVP:
-## Model
+## Проект состоит из следующих основных частей:
 
- Product: представляет данные товара.
+src - корневая папка исходного кода.
+common.blocks - общие блоки и стили.
+components - компоненты приложения.
+models - модели данных.
+## Компоненты и их интерфейс
 
-export class Product {
-    constructor(
-        public id: string,
-        public name: string,
-        public description: string,
-        public price: number,
-        public category: string,
-        public image: string
-    ) {}
-    
-    // Метод для обновления информации о продукте
-    updateProduct(details: Partial<Product>) {
-        Object.assign(this, details);
-    }
-}
+## Api.ts
+Api - базовый класс для работы с API.
+ ## Методы:
+get(uri: string): выполняет GET запрос.
+post(uri: string, data: object, method: ApiPostMethods = 'POST'): выполняет POST запрос.
+
+## Components.ts 
+Component<T> - абстрактный базовый класс для компонентов.
+Методы:
+toggleClass(element: HTMLElement, className: string, force?: boolean): переключает класс.
+setText(element: HTMLElement, value: string): устанавливает текстовое содержимое.
+setDisabled(element: HTMLElement, state: boolean): изменяет состояние блокировки элемента.
+setHidden(element: HTMLElement): скрывает элемент.
+setVisible(element: HTMLElement): отображает элемент.
+setImage(el: HTMLImageElement, src: string, alt?: string): устанавливает изображение с альтернативным текстом.
+render(data?: Partial<T>): рендерит компонент.
+
+## Events.ts
+EventEmitter - класс для работы с событиями.
+Методы:
+on<T extends object>(event: EventName, callback: (data: T) => void): подписывается на событие.
+emit<T extends object>(event: string, data?: T): испускает событие.
+
+## Model.ts
+Model<T> - базовая модель данных.
+Методы:
+emitChanges(event: string, payload?: object): испускает изменения.
+
+## Form.ts
+Form<T> - класс для работы с формами.
+Методы:
+onInputChange(field: keyof T, value: string): обработка изменения ввода.
+render(state: Partial<T> & IFormState): рендерит форму.
+
+## Modal.ts
+Modal - класс для работы с модальными окнами.
+Методы:
+open(): открывает модальное окно.
+close(): закрывает модальное окно.
+render(data: IModalData): рендерит модальное окно.
+
+## AppData.ts
+
+## Product - класс для работы с продуктами.
+Методы:
+addToBasket(value: Product): добавляет продукт в корзину.
+deleteFromBasket(id: string): удаляет продукт из корзины.
+clearBasket(): очищает корзину.
+setItems(): устанавливает элементы заказа.
+setOrderField(field: keyof IOrderForm, value: string): устанавливает поле заказа.
+validateContacts(): проверяет корректность контактной информации.
+validateOrder(): проверяет корректность заказа.
+refreshOrder(): обновляет заказ.
+getTotalBasketPrice(): получает общую цену корзины.
+setStore(items: IProduct[]): устанавливает магазинные товары.
+resetSelected(): сбрасывает выбор товаров.
+
+## Basket.ts
+
+## Basket - класс для работы с корзиной.
+Методы:
+set price(price: number): устанавливает цену корзины.
+set list(items: HTMLElement[]): устанавливает список товаров.
+disableButton(): отключает кнопку "Оформить".
+refreshIndices(): обновляет индексы товаров в корзине.
+
+## Card.ts
+
+## Card - класс для работы с карточками товаров.
+Методы:
+set id(value: string): устанавливает ID.
+set title(value: string): устанавливает название.
+set image(value: string): устанавливает изображение.
+set selected(value: boolean): устанавливает состояние выбора.
+set price(value: number | null): устанавливает цену.
+set category(value: CategoryType): устанавливает категорию.
 
 
- Customer: представляет данные покупателя.
- export class Customer {
-    constructor(
-        public id: string,
-        public name: string,
-        public email: string,
-        public phone: string,
-        public address: string
-    ) {}
+## Типы данных
 
-    // Метод для обновления информации о покупателе
-    updateCustomer(details: Partial<Customer>) {
-        Object.assign(this, details);
-    }
-}
-
- Cart: представляет корзину покупок.
- export class Cart {
-    items: CartItem[] = [];
-
-    // Метод для добавления товара в корзину
-    addItem(product: Product, quantity: number) {
-        const existingItem = this.items.find(item => item.product.id === product.id);
-        if (existingItem) {
-            existingItem.updateQuantity(existingItem.quantity + quantity);
-        } else {
-            this.items.push(new CartItem(product, quantity));
-        }
-    }
-
-    // Метод для удаления товара из корзины
-    removeItem(productId: string) {
-        this.items = this.items.filter(item => item.product.id !== productId);
-    }
-
-    // Метод для очистки корзины
-    clearCart() {
-        this.items = [];
-    }
-
-    // Метод для расчета общей стоимости товаров в корзине
-    calculateTotal(): number {
-        return this.items.reduce((total, item) => total + item.product.price * item.quantity, 0);
-    }
-}
-## View:
-
-## ProductView: интерфейс для отображения продуктов.
-Отображает список продуктов.
-Отображает ошибки загрузки продуктов.
-
-## CartView: интерфейс для отображения корзины.
-Отображает содержимое корзины.
-Отображает общую стоимость товаров в корзине.
-
-## OrderView: интерфейс для отображения формы заказа.
-Отображает форму заказа.
-Отправляет заказ.
-
-## Presenter:
-
-## ProductPresenter: управляет логикой представления для отображения товаров.
-Загружает список продуктов и передает их в ProductView.
-export class ProductPresenter {
-    constructor(
-        private productView: ProductView,
-        private products: Product[] = []
-    ) {
-        this.initialize();
-    }
-
-    private initialize() {
-        events.on('product:load', this.loadProducts.bind(this));
-    }
-
-    private loadProducts() {
-        try {
-            this.productView.displayProducts(this.products);
-        } catch (error) {
-            this.productView.displayError(error.message);
-        }
-    }
-}
-
-## CartPresenter: управляет логикой представления для корзины покупок и взаимодействий с ней.
-Добавляет и удаляет товары из корзины.
-Рассчитывает общую стоимость товаров в корзине и передает данные в CartView.
-export class CartPresenter {
-    constructor(
-        private cartView: CartView,
-        private cart: Cart
-    ) {
-        this.initialize();
-    }
-
-    // Инициализация событий
-    private initialize() {
-        events.on('cart:add', this.addToCart.bind(this));
-        events.on('cart:remove', this.removeFromCart.bind(this));
-        events.on('cart:clear', this.clearCart.bind(this));
-        events.on('cart:total', this.calculateTotal.bind(this));
-    }
-
-    // Метод для добавления товара в корзину
-    private addToCart(product: Product, quantity: number) {
-        this.cart.addItem(product, quantity);
-        this.cartView.displayCart(this.cart);
-    }
-
-    // Метод для удаления товара из корзины
-    private removeFromCart(productId: string) {
-        this.cart.removeItem(productId);
-        this.cartView.displayCart(this.cart);
-    }
-
-    // Метод для очистки корзины
-    private clearCart() {
-        this.cart.clearCart();
-        this.cartView.displayCart(this.cart);
-    }
-
-    // Метод для расчета общей стоимости товаров в корзине
-    private calculateTotal() {
-        const total = this.cart.calculateTotal();
-        this.cartView.displayTotal(total);
-    }
-}
-
-## OrderPresenter: управляет логикой представления для оформления заказа.
-Обрабатывает процесс оформления заказа и передает данные в OrderView.
-export class OrderPresenter {
-    constructor(
-        private orderView: OrderView,
-        private customer: Customer,
-        private cart: Cart
-    ) {
-        this.initialize();
-    }
-
-    // Инициализация событий
-    private initialize() {
-        events.on('order:submit', this.placeOrder.bind(this));
-    }
-
-    // Метод для оформления заказа
-    private placeOrder(paymentMethod: string) {
-        try {
-            this.orderView.submitOrder(this.customer, this.cart, paymentMethod);
-        } catch (error) {
-            console.error("Order submission failed", error);
-        }
-    }
-}
-
-## Описание структуры базового кода, компонентов и моделей данных
-
-Модели данных (Models)
-## Product
-
-id: string
-name: string
-description: string
-price: number
-category: string
-image: string
-
-## Customer
-
-id: string
-name: string
-email: string
-phone: string
-address: string
-
-## Cart
-
-items: CartItem[]
-totalAmount: number
-
-## CartItem
-
-product: Product
-quantity: number
+IOrder - интерфейс для заказа.
+IProduct - интерфейс для продукта.
+FormErrors - интерфейс для ошибок формы.
+IOrderForm - интерфейс для формы заказа.
+IAppState - интерфейс для состояния приложения.
 
 ## Взаимодействие частей приложения
-View компоненты взаимодействуют с Presenter для получения данных и отправки команд.
-Presenter компоненты обрабатывают бизнес-логику и изменения состояния данных.
-Models содержат данные и предоставляют их Presenter.
 
-## Описание программного интерфейса компонентов
+## Приложение использует паттерн проектирования MVC (Model-View-Controller):
 
-## ProductPresenter
-loadProducts(): void
-Загружает список продуктов и передает их в ProductView.
+## Model (Модель)
+Product - модель продукта.
+AppState - модель состояния приложения.
 
-## CartPresenter
-addToCart(product: Product, quantity: number): void
-Добавляет продукт в корзину.
-removeFromCart(productId: string): void
-Удаляет продукт из корзины.
-calculateTotal(): number
-Рассчитывает общую стоимость товаров в корзине и передает данные в CartView.
+## View (Представление)
+Component - базовый класс для всех представлений.
+Form - представление формы.
+Modal - представление модального окна.
+Basket - представление корзины.
+Card - представление карточки товара.
 
-## OrderPresenter
-placeOrder(customer: Customer, cart: Cart, paymentMethod: string): void
-Оформляет заказ, используя данные из корзины и выбранный способ оплаты, и передает данные в OrderView.
+## Controller (Контроллер)
+EventEmitter - контроллер для обработки событий.
+
+Каждая часть приложения взаимодействует через события и общие данные. Модель содержит данные и бизнес-логику, представление отображает данные и получает пользовательский ввод, а контроллер управляет потоком данных и обновлением представлений.
