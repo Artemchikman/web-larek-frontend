@@ -1,65 +1,92 @@
-// Тип для имени события, которое может быть строкой или регулярным выражением
+// Хорошая практика даже простые типы выносить в алиасы
+// Зато когда захотите поменять это достаточно сделать в одном месте
 type EventName = string | RegExp;
-
-// Тип для подписчика на событие, который является функцией
 type Subscriber = Function;
+type EmitterEvent = {
+	eventName: string;
+	data: unknown;
+};
 
-// Интерфейс для описания методов управления событиями
 export interface IEvents {
-  // Метод подписки на событие
-  on<T extends object>(event: EventName, callback: (data: T) => void): void;
-  // Метод для вызова события
-  emit<T extends object>(event: string, data?: T): void;
+	on<T extends object>(event: EventName, callback: (data: T) => void): void;
+	emit<T extends object>(event: string, data?: T): void;
+	trigger<T extends object>(
+		event: string,
+		context?: Partial<T>
+	): (data: T) => void;
 }
 
-// Класс для реализации интерфейса IEvents
+/**
+ * Брокер событий, классическая реализация
+ * В расширенных вариантах есть возможность подписаться на все события
+ * или слушать события по шаблону например
+ */
 export class EventEmitter implements IEvents {
-  // Хранение событий в виде карты, где ключом является имя события, а значением множество подписчиков
-  _events: Map<EventName, Set<Subscriber>>;
+	_events: Map<EventName, Set<Subscriber>>;
 
-  constructor() {
-    // Инициализация пустой карты событий при создании экземпляра класса
-    this._events = new Map<EventName, Set<Subscriber>>();
-  }
+	constructor() {
+		this._events = new Map<EventName, Set<Subscriber>>();
+	}
 
-  // Метод подписки на событие
-  on<T extends object>(eventName: EventName, callback: (event: T) => void) {
-    // Если события с данным именем еще нет в карте, создаем новое множество для подписчиков
-    if (!this._events.has(eventName)) {
-      this._events.set(eventName, new Set<Subscriber>());
-    }
-    // Добавляем подписчика в множество для данного события
-    this._events.get(eventName)?.add(callback);
-  }
+	/**
+	 * Установить обработчик на событие
+	 */
+	on<T extends object>(eventName: EventName, callback: (event: T) => void) {
+		if (!this._events.has(eventName)) {
+			this._events.set(eventName, new Set<Subscriber>());
+		}
+		this._events.get(eventName)?.add(callback);
+	}
 
-  // Метод отписки от события
-  off(eventName: EventName, callback: Subscriber) {
-    // Проверяем, есть ли такое событие в карте
-    if (this._events.has(eventName)) {
-      // Удаляем подписчика из множества для данного события
-      this._events.get(eventName)?.delete(callback);
-      // Если множество подписчиков стало пустым, удаляем событие из карты
-      if (this._events.get(eventName)?.size === 0) {
-        this._events.delete(eventName);
-      }
-    }
-  }
+	/**
+	 * Снять обработчик с события
+	 */
+	off(eventName: EventName, callback: Subscriber) {
+		if (this._events.has(eventName)) {
+			this._events.get(eventName)!.delete(callback);
+			if (this._events.get(eventName)?.size === 0) {
+				this._events.delete(eventName);
+			}
+		}
+	}
 
-  // Метод вызова события
-  emit<T extends object>(eventName: string, data?: T) {
-    // Перебираем все события в карте
-    this._events.forEach((subscribers, name) => {
-      // Если имя события является '*' (любое событие), вызываем всех подписчиков с данными о событии и его данных
-      if (name === '*') {
-        subscribers.forEach(callback => callback({
-          eventName,
-          data
-        }));
-      }
-      // Если имя события является регулярным выражением и событие соответствует этому выражению, вызываем подписчиков с данными
-      if (name instanceof RegExp && name.test(eventName) || name === eventName) {
-        subscribers.forEach(callback => callback(data));
-      }
-    });
-  }
+	/**
+	 * Инициировать событие с данными
+	 */
+	emit<T extends object>(eventName: string, data?: T) {
+		this._events.forEach((subscribers, name) => {
+			if (
+				(name instanceof RegExp && name.test(eventName)) ||
+				name === eventName
+			) {
+				subscribers.forEach((callback) => callback(data));
+			}
+		});
+	}
+
+	/**
+	 * Слушать все события
+	 */
+	onAll(callback: (event: EmitterEvent) => void) {
+		this.on('*', callback);
+	}
+
+	/**
+	 * Сбросить все обработчики
+	 */
+	offAll() {
+		this._events = new Map<string, Set<Subscriber>>();
+	}
+
+	/**
+	 * Сделать коллбек триггер, генерирующий событие при вызове
+	 */
+	trigger<T extends object>(eventName: string, context?: Partial<T>) {
+		return (event: object = {}) => {
+			this.emit(eventName, {
+				...(event || {}),
+				...(context || {}),
+			});
+		};
+	}
 }

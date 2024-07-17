@@ -1,54 +1,80 @@
-import { IEvents } from '../base/Events';
-import { provideElement } from '../../utils/utils';
 import { Component } from '../base/Components';
+import { ensureElement } from '../../utils/utils';
+import { IEvents } from '../base/Events';
 
-// Интерфейс для данных модального окна
-interface IModalData {
-  content: HTMLElement | null;
+export class ModalWindow extends Component<IModalData> {
+	protected _closeButton: HTMLButtonElement;
+	protected _content: HTMLElement;
+
+	constructor(protected events: IEvents, container: HTMLElement) {
+		super(container);
+
+		this._closeButton = ensureElement<HTMLButtonElement>(
+			'.modal__close',
+			container
+		);
+		this._content = ensureElement<HTMLElement>('.modal__content', container);
+
+		this._closeButton.addEventListener('click', this.close.bind(this));
+		this.container.addEventListener('click', this.close.bind(this));
+		this._content.addEventListener('click', (event) => event.stopPropagation());
+	}
+
+	set content(value: HTMLElement) {
+		this._content.replaceChildren(value);
+	}
+
+	open() {
+		this.container.classList.add('modal_active');
+		this.events.emit('modal:open');
+	}
+
+	close() {
+		this.container.classList.remove('modal_active');
+		this.content = null;
+		this.events.emit('modal:close');
+	}
+
+	render(data: IModalData): HTMLElement {
+		super.render(data);
+		this.open();
+		return this.container;
+	}
 }
 
-// Класс для модального окна
-export class Modal extends Component<IModalData> {
-    protected closeButton: HTMLButtonElement;
-    protected contentContainer: HTMLElement;
+export interface IModalData {
+	content: HTMLElement;
+}
+export interface ISuccessModal {
+	title: HTMLElement;
+	totalPrice: HTMLElement;
+	buttonToMainPage: HTMLButtonElement;
+}
+export class ConfirmationModal extends Component<ISuccessModal> {
+	protected title: HTMLElement;
+	protected _description: HTMLElement;
+	protected buttonToMainPage: HTMLButtonElement;
 
-    constructor(container: HTMLElement, protected events: IEvents) {
-      super(container);
-        // Инициализация элементов модального окна
-      this.closeButton = provideElement<HTMLButtonElement>('.modal__close', container);
-      this.contentContainer = provideElement<HTMLElement>('.modal__content', container);
-   // Обработчик закрытия модального окна по нажатию на кнопку
-      this.closeButton.addEventListener('click', this.close.bind(this));
-        // Обработчик закрытия модального окна по нажатию на область вне контента
-      this.container.addEventListener('click', this.close.bind(this));
-      // Остановка распространения события клика внутри контента
-      this.contentContainer.addEventListener('click', (event) => event.stopPropagation());
-    }
-    // Сеттер для установки контента модального окна
-    set content(value: HTMLElement) {
-      if (value !== null) {
-        this.contentContainer.replaceChildren(value);
-      } else {
-        this.contentContainer.innerHTML = '';
-      }
-    }
-   // Метод для открытия модального окна
-    open() {
-      this.container.classList.add('modal_active');
-      this.events.emit('modal:open');
-    }
-    // Метод для закрытия модального окна
-    close() {
-      this.container.classList.remove('modal_active');
-      this.content = null;
-      this.events.emit('modal:close');
-    }
-  // Метод рендеринга модального окна с данными
-    render(data: IModalData): HTMLElement {
-      super.render(data);
-      this.open();
-      return this.container;
-    }
-  }
+	constructor(container: HTMLElement, protected events: IEvents) {
+		super(container);
+		this.title = this.container.querySelector('.order-success__title');
+		this._description = this.container.querySelector(
+			'.order-success__description'
+		);
+		this.buttonToMainPage = this.container.querySelector(
+			'.order-success__close'
+		);
+		this.buttonToMainPage.addEventListener(
+			'click',
+			this.submitSuccessHandler.bind(this)
+		);
+	}
 
-  
+	set description(value: string) {
+		this._description.textContent = value;
+	}
+
+	submitSuccessHandler() {
+		this.events.emit('modalSucces:close');
+	}
+}

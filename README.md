@@ -44,116 +44,75 @@ yarn build
 ![alt text](image.png)
 
 
-## Проект состоит из следующих основных частей:
+### Базовые компоненты
 
-src - корневая папка исходного кода.
-common.blocks - общие блоки и стили.
-components - компоненты приложения.
-models - модели данных.
-## Компоненты и их интерфейс
+- **Api**: класс для взаимодействия с серверным API.
+- **Component**: базовый класс для всех компонентов.
+- **EventEmitter**: класс для управления событиями.
+- **Model**: базовый класс для всех моделей данных.
 
-## Api.ts
-Api - базовый класс для работы с API.
- ## Методы:
-get(uri: string): выполняет GET запрос.
-post(uri: string, data: object, method: ApiPostMethods = 'POST'): выполняет POST запрос.
+### Общие компоненты
 
-## Components.ts 
-Component<T> - абстрактный базовый класс для компонентов.
-Методы:
-toggleClass(element: HTMLElement, className: string, force?: boolean): переключает класс.
-setText(element: HTMLElement, value: string): устанавливает текстовое содержимое.
-setDisabled(element: HTMLElement, state: boolean): изменяет состояние блокировки элемента.
-setHidden(element: HTMLElement): скрывает элемент.
-setVisible(element: HTMLElement): отображает элемент.
-setImage(el: HTMLImageElement, src: string, alt?: string): устанавливает изображение с альтернативным текстом.
-render(data?: Partial<T>): рендерит компонент.
+- **Basket**: компонент корзины.
+- **ModalWindow**: компонент модального окна.
+- **OrderForm**: компонент формы заказа.
+- **SuccessModal**: компонент модального окна успешного заказа.
 
-## Events.ts
-EventEmitter - класс для работы с событиями.
-Методы:
-on<T extends object>(event: EventName, callback: (data: T) => void): подписывается на событие.
-emit<T extends object>(event: string, data?: T): испускает событие.
+## Программный интерфейс компонентов и назначение каждой части
 
-## Model.ts
-Model<T> - базовая модель данных.
-Методы:
-emitChanges(event: string, payload?: object): испускает изменения.
+### Api
 
-## Form.ts
-Form<T> - класс для работы с формами.
-Методы:
-onInputChange(field: keyof T, value: string): обработка изменения ввода.
-render(state: Partial<T> & IFormState): рендерит форму.
+Класс для взаимодействия с серверным API. Основные методы:
+- `get(uri: string)`: выполнение GET-запросов.
+- `post(uri: string, data: object, method: ApiPostMethods)`: выполнение POST/PUT/DELETE-запросов.
 
-## Modal.ts
-Modal - класс для работы с модальными окнами.
-Методы:
-open(): открывает модальное окно.
-close(): закрывает модальное окно.
-render(data: IModalData): рендерит модальное окно.
+### Component
 
-## AppData.ts
+Базовый класс для всех компонентов. Основные методы:
+- `toggleClass(element: HTMLElement, className: string, force?: boolean)`: переключение класса.
+- `setDisabled(element: HTMLElement, state: boolean)`: установка состояния disabled.
+- `setText(element: HTMLElement, value: string)`: установка текстового содержимого.
+- `setImage(element: HTMLImageElement, src: string, alt?: string)`: установка изображения.
+- `render(data?: Partial<T>)`: рендеринг компонента.
 
-## Product - класс для работы с продуктами.
-Методы:
-addToBasket(value: Product): добавляет продукт в корзину.
-deleteFromBasket(id: string): удаляет продукт из корзины.
-clearBasket(): очищает корзину.
-setItems(): устанавливает элементы заказа.
-setOrderField(field: keyof IOrderForm, value: string): устанавливает поле заказа.
-validateContacts(): проверяет корректность контактной информации.
-validateOrder(): проверяет корректность заказа.
-refreshOrder(): обновляет заказ.
-getTotalBasketPrice(): получает общую цену корзины.
-setStore(items: IProduct[]): устанавливает магазинные товары.
-resetSelected(): сбрасывает выбор товаров.
+### EventEmitter
 
-## Basket.ts
+Класс для управления событиями. Основные методы:
+- `on(event: EventName, callback: Subscriber)`: установка обработчика на событие.
+- `off(event: EventName, callback: Subscriber)`: снятие обработчика с события.
+- `emit(event: string, data?: object)`: инициирование события.
 
-## Basket - класс для работы с корзиной.
-Методы:
-set price(price: number): устанавливает цену корзины.
-set list(items: HTMLElement[]): устанавливает список товаров.
-disableButton(): отключает кнопку "Оформить".
-refreshIndices(): обновляет индексы товаров в корзине.
+### Model
 
-## Card.ts
-
-## Card - класс для работы с карточками товаров.
-Методы:
-set id(value: string): устанавливает ID.
-set title(value: string): устанавливает название.
-set image(value: string): устанавливает изображение.
-set selected(value: boolean): устанавливает состояние выбора.
-set price(value: number | null): устанавливает цену.
-set category(value: CategoryType): устанавливает категорию.
-
+Базовый класс для всех моделей данных. Основные методы:
+- `emitChanges(event: string, payload?: object)`: уведомление об изменениях модели.
 
 ## Типы данных
 
-IOrder - интерфейс для заказа.
-IProduct - интерфейс для продукта.
-FormErrors - интерфейс для ошибок формы.
-IOrderForm - интерфейс для формы заказа.
-IAppState - интерфейс для состояния приложения.
+Приложение работает с различными типами данных, основными из которых являются:
+- **ICard**: информация о карточке товара.
+- **IOrderProposal**: предложение заказа.
+- **IFormState**: состояние формы.
 
 ## Взаимодействие частей приложения
 
-## Приложение использует паттерн проектирования MVC (Model-View-Controller):
+Компоненты взаимодействуют друг с другом через события и API. Например, `OrderForm` использует `EventEmitter` для отправки событий при изменении данных формы или ее отправке. `ModalWindow` слушает события и открывается или закрывается в зависимости от них.
 
-## Model (Модель)
-Product - модель продукта.
-AppState - модель состояния приложения.
+## Паттерн проектирования (MVC) и распределение классов между слоями
 
-## View (Представление)
-Component - базовый класс для всех представлений.
-Form - представление формы.
-Modal - представление модального окна.
-Basket - представление корзины.
-Card - представление карточки товара.
+Для данного проекта подходит паттерн MVC (Model-View-Controller). Распределение классов между слоями:
 
-## Controller (Контроллер)
-EventEmitter - контроллер для обработки событий.
+- **Model**:
+  - `Model`
+  - `AppData`
 
-Каждая часть приложения взаимодействует через события и общие данные. Модель содержит данные и бизнес-логику, представление отображает данные и получает пользовательский ввод, а контроллер управляет потоком данных и обновлением представлений.
+- **View**:
+  - `Component`
+  - `Basket`
+  - `ModalWindow`
+  - `OrderForm`
+  - `SuccessModal`
+
+- **Controller**:
+  - `Api`
+  - `EventEmitter`
