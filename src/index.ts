@@ -117,11 +117,11 @@ events.on('order:open', () => {
 		};
 
 		modal.render({ content: orderForm.render(initialState) });
-		events.emit('modal:open', { windowType: 'orderForm' });
+		events.emit('orderForm:open');
 	}
 });
 
-// Обработка события: Открытие корзины
+// Обработка события открытия корзины
 events.on('basket:open', () => {
 	appData.setOrderField('items', []);
 	appData.setOrderField('total', 0);
@@ -182,12 +182,14 @@ events.on('product:select', (item: ICard) => {
 		productPreviewItem.button = 'Уже в корзине';
 	}
 });
+
 // Обработка события: Удаление элемента из корзины
 events.on('basketItem:remove', (item: ICard) => {
 	appData.removeCardFromBasket(item);
 	page.counter = appData.getBasket().length;
 	events.emit('basket:open', item);
 });
+
 events.on('formErrors:change', (errors: Partial<IOrderForm>) => {
 	const { address, email, phone } = errors;
 	orderForm.valid = !address;
@@ -219,7 +221,7 @@ events.on('orderForm:submit', () => {
 		phone: '',
 	};
 	modal.render({ content: contactsForm.render(initialState) });
-	events.emit('modal:open', { windowType: 'contactsForm' });
+	events.emit('contactsForm:open');
 });
 
 // Обработка события закрытия модального окна успеха
@@ -227,15 +229,20 @@ events.on('modalSucces:close', () => {
 	modal.close();
 });
 
+// Обработка события открытия формы заказа
+events.on('orderForm:open', () => {
+	orderForm.toggleButtonState();
+	events.emit('modal:open');
+});
+
+// Обработка события открытия контактной формы
+events.on('contactsForm:open', () => {
+	contactsForm.updateButtonState();
+	events.emit('modal:open');
+});
+
 // Обработка события открытия модального окна
-events.on('modal:open', (data?: { windowType: string }) => {
-	if (data && data.windowType) {
-		if (data.windowType === 'orderForm') {
-			orderForm.toggleButtonState();
-		} else if (data.windowType === 'contactsForm') {
-			contactsForm.updateButtonState();
-		}
-	}
+events.on('modal:open', () => {
 	page.locked = true;
 });
 
