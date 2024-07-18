@@ -16,12 +16,12 @@ export class AppData extends Model<IAppStateData> {
 		items: [],
 	};
 
-	set Cards(cards: ICard[]) {
+	set cards(cards: ICard[]) {
 		this._cards = cards;
 		this.events.emit('productList:changed', this._cards);
 	}
 
-	get Cards() {
+	get cards() {
 		return this._cards;
 	}
 

@@ -71,7 +71,7 @@ export class ConfirmationModal extends Component<ISuccessModal> {
 	}
 
 	set description(value: string) {
-		this._description.textContent = value;
+		this.setText(this._description, value);
 	}
 
 	submitSuccessHandler() {
