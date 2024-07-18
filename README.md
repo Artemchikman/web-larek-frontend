@@ -3,6 +3,7 @@
 Стек: HTML, SCSS, TS, Webpack
 
 ## Структура проекта:
+
 - **src/** — исходные файлы проекта
 - **src/components/** — папка с JS компонентами
 - **src/components/base/** — папка с базовым кодом
@@ -16,6 +17,7 @@
   - **src/components/common/SuccessModal.ts** — компонент модального окна успешного заказа
 
 ## Важные файлы:
+
 - **src/pages/index.html** — HTML-файл главной страницы
 - **src/types/index.ts** — файл с типами
 - **src/index.ts** — точка входа приложения
@@ -23,8 +25,8 @@
 - **src/utils/constants.ts** — файл с константами
 - **src/utils/utils.ts** — файл с утилитами
 
-
 ## Установка и запуск
+
 Для установки и запуска проекта необходимо выполнить команды
 
 ```
@@ -38,6 +40,7 @@ npm run start
 yarn
 yarn start
 ```
+
 ## Сборка
 
 ```
@@ -49,9 +52,10 @@ npm run build
 ```
 yarn build
 ```
-## Архитектура проекта
-![alt text](image.png)
 
+## Архитектура проекта
+
+![alt text](image.png)
 
 ### Базовые компоненты
 
@@ -72,12 +76,14 @@ yarn build
 ### Api
 
 Класс для взаимодействия с серверным API. Основные методы:
+
 - `get(uri: string)`: выполнение GET-запросов.
 - `post(uri: string, data: object, method: ApiPostMethods)`: выполнение POST/PUT/DELETE-запросов.
 
 ### Component
 
 Базовый класс для всех компонентов. Основные методы:
+
 - `toggleClass(element: HTMLElement, className: string, force?: boolean)`: переключение класса.
 - `setDisabled(element: HTMLElement, state: boolean)`: установка состояния disabled.
 - `setText(element: HTMLElement, value: string)`: установка текстового содержимого.
@@ -87,6 +93,7 @@ yarn build
 ### EventEmitter
 
 Класс для управления событиями. Основные методы:
+
 - `on(event: EventName, callback: Subscriber)`: установка обработчика на событие.
 - `off(event: EventName, callback: Subscriber)`: снятие обработчика с события.
 - `emit(event: string, data?: object)`: инициирование события.
@@ -94,9 +101,11 @@ yarn build
 ### Model
 
 Базовый класс для всех моделей данных. Основные методы:
+
 - `emitChanges(event: string, payload?: object)`: уведомление об изменениях модели.
 
 ## Типы данных
+
 Приложение работает с различными типами данных, основными из которых являются:
 
 - **ICard**: информация о карточке товара.
@@ -105,10 +114,12 @@ yarn build
 
 ## Взаимодействие частей приложения
 
-  Компоненты взаимодействуют друг с другом через события и API. Например, `OrderForm` использует `EventEmitter` для отправки событий при изменении данных формы или ее отправке. `ModalWindow` слушает события и открывается или закрывается в зависимости от них.
+Компоненты взаимодействуют друг с другом через события и API. Например, `OrderForm` использует `EventEmitter` для отправки событий при изменении данных формы или ее отправке. `ModalWindow` слушает события и открывается или закрывается в зависимости от них.
 
 ## Реализуемые классы
+
 `Api`
+
 ## Атрибуты:
 
 `baseUrl`: string — базовый URL для API запросов.
@@ -120,9 +131,11 @@ yarn build
 - `post(uri: string, data: object, method: ApiPostMethods = 'POST'): Promise<object>` — выполнение POST/PUT/DELETE-запросов.
 
 **Component**
+
 ## Атрибуты:
 
 `container: HTMLElement` — контейнер для компонента.
+
 ## Методы:
 
 - `toggleClass(element: HTMLElement, className: string, force?: boolean): void` — переключение класса.
@@ -132,6 +145,7 @@ yarn build
 - `render(data?: Partial<T>): HTMLElement `— рендеринг компонента.
 
 **EventEmitter**
+
 ## Методы:
 
 - `on(event: EventName, callback: Subscriber): void` — установка обработчика на событие.
@@ -144,25 +158,28 @@ yarn build
 - `emitChanges(event: string, payload?: object): void `— уведомление об изменениях модели.
 
 ## Пользовательские события
+
 - `order:open `— открытие заказа.
 - `order:change `— изменение данных заказа.
 - `contacts:change `— изменение данных контактов.
 
-## Паттерн проектирования (MVC) и распределение классов между слоями 
- 
-Для данного проекта подходит паттерн MVC (Model-View-Controller). Распределение классов между слоями: 
- 
-- **Model**: 
-  - `Model` 
-  - `AppData` 
- 
-- **View**: 
-  - `Component` 
-  - `Basket` 
-  - `ModalWindow` 
-  - `OrderForm` 
-  - `SuccessModal` 
- 
-- **Controller**: 
-  - `Api` 
+## Паттерн проектирования (MVC) и распределение классов между слоями
+
+Для данного проекта подходит паттерн MVC (Model-View-Controller). Распределение классов между слоями:
+
+- **Model**:
+
+  - `Model`
+  - `AppData`
+
+- **View**:
+
+  - `Component`
+  - `Basket`
+  - `ModalWindow`
+  - `OrderForm`
+  - `SuccessModal`
+
+- **Controller**:
+  - `Api`
   - `EventEmitter`
